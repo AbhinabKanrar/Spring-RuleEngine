@@ -1,0 +1,32 @@
+import com.wrkspot.ruleengine.model.TimeSheet;
+import com.wrkspot.ruleengine.model.PaymentDetail;
+
+global com.wrkspot.ruleengine.model.PaymentDetail payment;
+dialect  "mvel"
+
+rule "Calculate Payment - Rule Normal Pay"
+    when
+        timesheetdata:TimeSheet(totalTime <= 8);
+    then
+    	payment.setNormalTime(timesheetdata.getTotalTime());
+    	payment.setFirstGradeOverTime(0);
+    	payment.setSecondGradeOverTime(0);
+end
+
+rule "Calculate Payment - Rule FirstGradeOverTime Pay"
+    when
+        timesheetdata:TimeSheet(totalTime > 8 && totalTime <= 10);
+    then
+    	payment.setNormalTime(8);
+    	payment.setFirstGradeOverTime(timesheetdata.getTotalTime() - 8);
+    	payment.setSecondGradeOverTime(0);
+end
+
+rule "Calculate Payment - Rule SecondGradeOverTime Pay"
+    when
+        timesheetdata:TimeSheet(totalTime > 10 && totalTime <= 12);
+    then
+    	payment.setNormalTime(8);
+    	payment.setFirstGradeOverTime(2);
+    	payment.setSecondGradeOverTime(timesheetdata.getTotalTime() - 10);
+end
